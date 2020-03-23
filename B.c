@@ -5,7 +5,16 @@ ECE 362 HW5 Q2
 3/4/20
 
 This is the second program for HW5.
-
+Inputs: Integer as a seed for the rand() function
+        Integers 1, 2, 4 or 8 as requested number of threads
+This program creates an array of 64000 integers, and computes the sum
+of all the elements twice. Once with a single process and then again
+by creating one or more threads that each compute a fair share of the sum.
+threads that compute one portion of the sum o
+Note: I have arbitrarily chosen to generate random integers
+between 0 and 100 only. I have also chosen default values for
+the seed and number of threads arbitrarily as 1 and 2 respectively.
+Also, my program assumes that it can create 1, 2, 4 or 8 threads only.
 */
 
 ////////Preprocessor////////
@@ -96,10 +105,14 @@ int main(int argc, char *argv[]) {
         deterministicSum += intArray[i];
     }
 
+/*
+    //print first 5 integers for testing
     printf("First 5 integers are:\n");
     for (int i=0; i<5; ++i) {
         printf("%d\n", intArray[i]);
     }
+*/
+
     printf("The expected sum is %d.\n", deterministicSum);
 
     //create the threads
@@ -132,10 +145,12 @@ int main(int argc, char *argv[]) {
 
     //all threads have completed, now compare sums and finish
     printf("Back in main.\n");
+    //sums are the same
     if (deterministicSum == threadSum) {
         printf("SUCCESS!!\n");
         printf("The multi-threaded sum is also %d.\n", threadSum);
     }
+    //sums are not the same
     else {
         printf("ERROR: Multi-threaded sum is not correct.\n");
         printf("Thread Sum = %d\n", threadSum);
@@ -182,42 +197,30 @@ void *calcSubTotal(void *arg) {
     }
     printf("This is thread %d, subtotal is %d\n", pthread_self(), args->subTotal);
     pthread_mutex_lock(&lock);
-        printf("threadSum is %d before update\n", *(args->threadSum) );
+//        printf("threadSum is %d before update\n", *(args->threadSum) );
         //add this thread's subTotal to the current threadSum
         *(args->threadSum) += args->subTotal;
-        printf("threadSum is %d after update\n", *(args->threadSum) );
+//        printf("threadSum is %d after update\n", *(args->threadSum) );
     pthread_mutex_unlock(&lock);
     return NULL;
 }
 
 /* Function for initializing the struct of input arguments for each thread.
-Inputs: pointer to struct, index number of this thread, pointer to array, pointer to global sum
+Inputs: pointer to struct, index number of this thread, total number of threads, pointer to array, pointer to global sum
 Outputs: does not explicitly return anything
 Actions: Initialize each member of the arg struct
 */
 void initThreadArgs(threadArgsPtr_t argStruct, int threadsIndex, int numThreads, int *intArray, int *threadSum) {
     argStruct->threadsIndex = threadsIndex;
-    printf("Initializing thread %d\n", argStruct->threadsIndex);
+//    printf("Initializing thread %d\n", argStruct->threadsIndex);
     argStruct->numThreads = numThreads;
-    printf("There are %d threads total\n", argStruct->numThreads);
+//    printf("There are %d threads total\n", argStruct->numThreads);
     argStruct->subTotal = 0;
-    printf("The subtotal is initialized to %d\n", argStruct->subTotal);
+//    printf("The subtotal is initialized to %d\n", argStruct->subTotal);
     argStruct->intArray = intArray;
-    printf("Second element of array is %d\n", argStruct->intArray[1]);
+//    printf("Second element of array is %d\n", argStruct->intArray[1]);
     argStruct->threadSum = threadSum;
-    printf("Global sum is %d\n", *(argStruct->threadSum) );
-    printf("\n");
+//    printf("Global sum is %d\n", *(argStruct->threadSum) );
+//    printf("\n");
     return;
 }
-
-/*
-        initThreadArgs(&threadArgs[i], i, numThreads, intArray, &threadSum);
-
-typedef struct { //struct that holds arguments for each thread
-    int threadsIndex;
-    int numThreads;
-    int subTotal;
-    int *intArray;
-    int *threadSum;
-} threadArgs_t, *threadArgsPtr_t;
-*/
